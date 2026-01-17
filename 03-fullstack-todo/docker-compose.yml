@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
   db:
     image: postgres:15-alpine
     container_name: todo-db
@@ -12,13 +11,12 @@ services:
       POSTGRES_DB: tododb
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql  # ← Zmienione na server
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
 
-  # Backend API
   backend:
-    build: ./server                                              
+    build: ./server
     container_name: todo-backend
     restart: unless-stopped
     environment:
@@ -33,11 +31,10 @@ services:
     depends_on:
       - db
     command: sh -c "sleep 15 && node server.js"
-    # ← USUNĄŁEM volumes - to powodowało problem!
+    # ← BRAK volumes tutaj! To był problem!
 
-  # Frontend React
   frontend:
-    build: ./client                                              
+    build: ./client
     container_name: todo-frontend
     restart: unless-stopped
     ports:
@@ -45,7 +42,6 @@ services:
     depends_on:
       - backend
 
-# Volumes for persistent data
 volumes:
   postgres_data:
     driver: local
