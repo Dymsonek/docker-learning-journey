@@ -2,18 +2,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Kopiuj package.json
+COPY package.json ./
 
-# Install dependencies
-# Użyj npm install zamiast npm ci
+# Instaluj zależności
 RUN npm install --production
 
-# Copy application code
+# Kopiuj WSZYSTKIE pliki (server.js, init.sql, etc.)
 COPY . .
 
 # Expose port
 EXPOSE 5000
 
 # Start server
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
