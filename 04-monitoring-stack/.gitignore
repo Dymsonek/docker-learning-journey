@@ -1,0 +1,14 @@
+# Data directories
+data/
+grafana_data/
+prometheus_data/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
