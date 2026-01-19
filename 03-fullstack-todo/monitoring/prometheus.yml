@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Alerting (opcjonalnie - na później)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Skąd Prometheus zbiera metryki
+scrape_configs:
+  # Prometheus sam siebie
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # System metrics (CPU, RAM, disk)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # PostgreSQL (opcjonalnie - wymaga postgres_exporter)
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['db:5432']
+
+  # Backend API (wymaga dodania /metrics endpoint)
+  - job_name: 'backend'
+    static_configs:
+      - targets: ['backend:5000']
+    metrics_path: '/metrics'
