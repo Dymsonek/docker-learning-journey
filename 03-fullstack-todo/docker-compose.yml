@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   db:
     image: postgres:15-alpine
     container_name: todo-db
@@ -15,6 +16,7 @@ services:
     ports:
       - "5432:5432"
 
+  # Backend API
   backend:
     build: ./server
     container_name: todo-backend
@@ -31,8 +33,8 @@ services:
     depends_on:
       - db
     command: sh -c "sleep 15 && node server.js"
-    # ← BRAK volumes tutaj! To był problem!
 
+  # Frontend React
   frontend:
     build: ./client
     container_name: todo-frontend
@@ -42,6 +44,53 @@ services:
     depends_on:
       - backend
 
+  # Prometheus - metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: todo-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+
+  # Grafana - visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: todo-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+  # Node Exporter - system metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: todo-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+
+# Volumes
 volumes:
   postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
     driver: local
